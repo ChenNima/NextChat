@@ -1,6 +1,7 @@
 import {
   getMessageTextContent,
   isDalle3,
+  removeThinkContent,
   safeLocalStorage,
   trimTopic,
 } from "../utils";
@@ -718,7 +719,9 @@ export const useChatStore = createPersistStore(
                   session,
                   (session) =>
                     (session.topic =
-                      message.length > 0 ? trimTopic(message) : DEFAULT_TOPIC),
+                      message.length > 0
+                        ? trimTopic(removeThinkContent(message))
+                        : DEFAULT_TOPIC),
                 );
               }
             },

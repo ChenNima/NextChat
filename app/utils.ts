@@ -244,7 +244,7 @@ export function getThinkTextContent({ content }: RequestMessage) {
   return "";
 }
 
-function removeThinkContent(content: string) {
+export function removeThinkContent(content: string) {
   const thinkStart = !!~content.indexOf("<think>");
   const thinkEnd = !!~content.indexOf("</think>");
   if (!thinkStart) {
