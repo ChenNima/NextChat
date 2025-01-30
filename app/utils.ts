@@ -229,9 +229,43 @@ export function isMacOS(): boolean {
   return false;
 }
 
+export function getThinkTextContent({ content }: RequestMessage) {
+  if (typeof content === "string") {
+    const thinkStart = !!~content.indexOf("<think>");
+    const thinkEnd = !!~content.indexOf("</think>");
+    if (!thinkStart) {
+      return "";
+    }
+    if (!thinkEnd) {
+      return content.split("<think>")[1].trim();
+    }
+    return content.split("<think>")[1].split("</think>")[0].trim();
+  }
+  return "";
+}
+
+function removeThinkContent(content: string) {
+  const thinkStart = !!~content.indexOf("<think>");
+  const thinkEnd = !!~content.indexOf("</think>");
+  if (!thinkStart) {
+    return content;
+  }
+  if (!thinkEnd) {
+    return "";
+  }
+  return content.split("</think>")[1].trim();
+}
+
 export function getMessageTextContent(message: RequestMessage) {
   if (typeof message.content === "string") {
-    return message.content;
+    const thinkText = getThinkTextContent(message);
+    const generatedContent = removeThinkContent(message.content);
+    if (!thinkText) {
+      return generatedContent;
+    }
+    return `> ${thinkText.replaceAll("\n", "\n >")}
+
+${generatedContent}`;
   }
   for (const c of message.content) {
     if (c.type === "text") {
@@ -256,9 +290,7 @@ export function getMessageImages(message: RequestMessage): string[] {
 
 export function isVisionModel(model: string) {
   const visionModels = useAccessStore.getState().visionModels;
-  const envVisionModels = visionModels
-    ?.split(",")
-    .map((m) => m.trim());
+  const envVisionModels = visionModels?.split(",").map((m) => m.trim());
   if (envVisionModels?.includes(model)) {
     return true;
   }
